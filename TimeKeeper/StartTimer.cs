@@ -13,23 +13,20 @@ namespace TimeKeeper
     public static class StartTimer
     {
         [FunctionName("StartTimer")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
+        public static IActionResult Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            log.LogDebug("StartTimer function has been called.");
 
-            string name = req.Query["name"];
+            Timer timer = new Timer($"timer-{Guid.NewGuid()}")
+            {
+                startTime = DateTime.Now
+            };
 
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;
+            string response = $"Timer {timer.ToJson()} created.";
 
-            string responseMessage = string.IsNullOrEmpty(name)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"Hello, {name}. This HTTP triggered function executed successfully.";
-
-            return new OkObjectResult(responseMessage);
+            return new OkObjectResult(response);
         }
     }
 }
